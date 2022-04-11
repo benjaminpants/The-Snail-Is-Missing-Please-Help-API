@@ -31,6 +31,7 @@ namespace TSIMPH
                     {
                         Console.WriteLine("Reading File: " + fo.Name);
                         Dict.Add(Path.GetFileNameWithoutExtension(fo.Name), File.ReadAllText(infos[i]));
+                        Patcher.AddFileToCache(0, infos[i]);
                     }
                 }
             }

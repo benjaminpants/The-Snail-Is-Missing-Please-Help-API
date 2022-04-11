@@ -27,6 +27,7 @@ namespace TSIMPH
             foreach (string file in Directory.GetFiles(folder, "*.wav"))
             {
                 Hooker.AddSound(currentaudiogroup, audiogroup, file);
+                Patcher.AddFileToCache(audiogroup,file);
             }
         }
 
