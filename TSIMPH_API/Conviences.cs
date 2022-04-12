@@ -17,8 +17,8 @@ namespace TSIMPH
         {
 
             Logger.Log("Decompiling: " + code.Name.Content);
-            
-            return Decompiler.Decompile(code, new GlobalDecompileContext(Patcher.data,false));
+
+            return Decompiler.Decompile(code, new GlobalDecompileContext(Patcher.data, false));
         }
 
         public static void AddAudioFolder(int currentaudiogroup, int audiogroup, string folder)
@@ -27,11 +27,11 @@ namespace TSIMPH
             foreach (string file in Directory.GetFiles(folder, "*.wav"))
             {
                 Hooker.AddSound(currentaudiogroup, audiogroup, file);
-                Patcher.AddFileToCache(audiogroup,file);
+                Patcher.AddFileToCache(audiogroup, file);
             }
         }
 
-        
+
         public static UndertaleRoom.GameObject AddObjectToLayer(this UndertaleRoom room, UndertaleData data, string objectname, string layername)
         {
             data.GeneralInfo.LastObj++;
@@ -78,6 +78,23 @@ namespace TSIMPH
             return code;
         }
 
+        public static void ReplaceBuiltInFunction(string name, string og_name, string gml, ushort arguments)
+        {
+            UndertaleCode hookCode = Hooker.CreateLegacyScript(name, gml, arguments).Code;
+
+            foreach (UndertaleCode dataCode in Patcher.data.Code)
+            {
+                if (dataCode.ParentEntry is not null || dataCode == hookCode)
+                    continue;
+
+                Hooker.HookAsm(dataCode, Patcher.data.CodeLocals.ByName(dataCode.Name.Content), (code, locals) => {
+                    AsmCursor cursor = new(code, locals);
+                    while (cursor.GotoNext($"call.i {og_name}(argc={arguments})"))
+                        cursor.Replace($"call.i {name}(argc={arguments})");
+                });
+            }
+        }
+        
 
         public static UndertaleRoom CreateBlankLevelRoom(string roomname)
         {
