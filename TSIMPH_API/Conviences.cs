@@ -13,20 +13,20 @@ namespace TSIMPH
 {
     public static class Conviences
     {
-        public static string DecompileGML(this UndertaleCode code)
+        public static string DecompileGML(this UndertaleCode code, UndertaleData data)
         {
 
             Logger.Log("Decompiling: " + code.Name.Content);
 
-            return Decompiler.Decompile(code, new GlobalDecompileContext(Patcher.data, false));
+            return Decompiler.Decompile(code, new GlobalDecompileContext(data, false));
         }
 
-        public static void AddAudioFolder(int currentaudiogroup, int audiogroup, string folder)
+        public static void AddAudioFolder(int currentaudiogroup, int audiogroup, string folder, UndertaleData data)
         {
             //iterate through all .wavs in the specified folder
             foreach (string file in Directory.GetFiles(folder, "*.wav"))
             {
-                Hooker.AddSound(currentaudiogroup, audiogroup, file);
+                data.AddSound(currentaudiogroup, audiogroup, file);
                 Patcher.AddFileToCache(audiogroup, file);
             }
         }
@@ -50,15 +50,9 @@ namespace TSIMPH
             return obj;
         }
 
-        public static void AppendGMLSafe(this UndertaleCode code, string gml)
+        public static void PrependCode(string name, string gml, UndertaleData data)
         {
-            GmmlHooker.Hooker.AppendGmlSafe(code, gml); //CONFIG MAKE THIS AN EXTENSION METHOD I SWEAR TO GOD
-
-        }
-
-        public static void PrependCode(string name, string gml)
-        {
-            Hooker.HookCode(name, gml + "\n#orig#()");
+            data.HookCode(name, gml + "\n#orig#()");
         }
 
 
@@ -78,27 +72,29 @@ namespace TSIMPH
             return code;
         }
 
-        public static void ReplaceBuiltInFunction(string name, string og_name, string gml, ushort arguments)
+        public static void ReplaceBuiltInFunction(string name, string og_name, string gml, ushort arguments, UndertaleData data)
         {
-            UndertaleCode hookCode = Hooker.CreateLegacyScript(name, gml, arguments).Code;
+            UndertaleCode hookCode = data.CreateLegacyScript(name, gml, arguments).Code;
 
-            foreach (UndertaleCode dataCode in Patcher.data.Code)
+            foreach (UndertaleCode dataCode in data.Code)
             {
                 if (dataCode.ParentEntry is not null || dataCode == hookCode)
                     continue;
+                
 
-                Hooker.HookAsm(dataCode, Patcher.data.CodeLocals.ByName(dataCode.Name.Content), (code, locals) => {
-                    AsmCursor cursor = new(code, locals);
+                
+                data.HookAsm(dataCode.Name.Content, (code, locals) => {
+                    AsmCursor cursor = new(data, code, locals);
                     while (cursor.GotoNext($"call.i {og_name}(argc={arguments})"))
                         cursor.Replace($"call.i {name}(argc={arguments})");
                 });
             }
         }
         
-
-        public static UndertaleRoom CreateBlankLevelRoom(string roomname)
+        
+        public static UndertaleRoom CreateBlankLevelRoom(string roomname, UndertaleData data)
         {
-            UndertaleRoom copyme_room = Patcher.data.Rooms.First(room => room.Name.Content == "level_basic_copy_me");
+            UndertaleRoom copyme_room = data.Rooms.First(room => room.Name.Content == "level_basic_copy_me");
 
             if (copyme_room == null)
             {
@@ -108,7 +104,7 @@ namespace TSIMPH
             {
                 Logger.Log("Located basic level, attempting copy..");
                 UndertaleRoom newroom = new UndertaleRoom();
-                newroom.Name = Patcher.data.Strings.MakeString(roomname);
+                newroom.Name = data.Strings.MakeString(roomname);
                 newroom.Width = copyme_room.Width;
                 newroom.Height = copyme_room.Height;
                 newroom.BackgroundColor = copyme_room.BackgroundColor;
@@ -141,7 +137,7 @@ namespace TSIMPH
 
                 // Find the largest layer id
                 // Shamelessly stolen from UMT source
-                foreach (UndertaleRoom Room in Patcher.data.Rooms)
+                foreach (UndertaleRoom Room in data.Rooms)
                 {
                     foreach (UndertaleRoom.Layer Layer in Room.Layers)
                     {

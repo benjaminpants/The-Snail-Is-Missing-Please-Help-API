@@ -16,7 +16,7 @@ namespace TSIMPH
 {
     public class GameMakerMod : IGameMakerMod
     {
-        public void Load(int audioGroup, ModData currentmod)
+        public void Load(int audioGroup, UndertaleData data, ModData currentmod)
         {
             
         }
