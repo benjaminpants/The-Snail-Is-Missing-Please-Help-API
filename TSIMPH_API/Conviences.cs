@@ -13,6 +13,23 @@ namespace TSIMPH
 {
     public static class Conviences
     {
+
+
+        public static string SavePrefix { get; private set; } = "";
+
+        public static void AddSavePrefix(string prf)
+        {
+            if (SavePrefix == "")
+            {
+                SavePrefix = prf;
+            }
+            else
+            {
+                SavePrefix = SavePrefix + "_" + prf;
+            }
+        }
+
+
         public static string DecompileGML(this UndertaleCode code, UndertaleData data)
         {
 
