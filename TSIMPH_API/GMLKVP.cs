@@ -54,5 +54,19 @@ namespace TSIMPH
             }
             return dict.Count != 0;
         }
+        
+        public static void LoadGMLFolderRecursive(string gmlfolder, string skip = "")
+        {
+            if (gmlfolder != skip)
+                LoadGMLFolder(gmlfolder);
+
+            string[] directoies = Directory.GetDirectories(gmlfolder);
+
+            for (int i = 0; i < directoies.Length; i++)
+            {
+                LoadGMLFolder(directoies[i]);
+                LoadGMLFolderRecursive(directoies[i], directoies[i]);
+            }
+        }
     }
 }
