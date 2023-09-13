@@ -1,13 +1,11 @@
-﻿using GmmlPatcher;
-using GmmlHooker;
-using UndertaleModLib;
+﻿using UndertaleModLib;
 using UndertaleModLib.Models;
 using System.Linq;
 using System;
-using WysApi.Api;
 using System.IO;
 using UndertaleModLib.Decompiler;
 using System.Reflection;
+using GMHooker;
 
 namespace TSIMPH
 {
@@ -44,7 +42,7 @@ namespace TSIMPH
             foreach (string file in Directory.GetFiles(folder, "*.wav"))
             {
                 data.AddSound(currentaudiogroup, audiogroup, file);
-                Patcher.AddFileToCache(audiogroup, file);
+                //Patcher.AddFileToCache(audiogroup, file);
             }
         }
 

@@ -1,14 +1,11 @@
-﻿using GmmlPatcher;
-using GmmlHooker;
-using UndertaleModLib;
+﻿using UndertaleModLib;
 using UndertaleModLib.Models;
 using System.Linq;
 using System;
-using WysApi.Api;
 using System.IO;
 using UndertaleModLib.Decompiler;
 using System.Reflection;
-
+using GMHooker;
 
 
 namespace TSIMPH
@@ -31,7 +28,7 @@ namespace TSIMPH
                     {
                         Console.WriteLine("Reading File: " + fo.Name);
                         Dict.Add(Path.GetFileNameWithoutExtension(fo.Name), File.ReadAllText(infos[i]));
-                        Patcher.AddFileToCache(0, infos[i]);
+                        //Patcher.AddFileToCache(0, infos[i]);
                     }
                 }
             }
